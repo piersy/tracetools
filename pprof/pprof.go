@@ -19,6 +19,11 @@ type Record struct {
 	Time int64
 }
 
+// Interval represents a time Interval in the trace.
+type Interval struct {
+	Begin, End int64 // nanoseconds.
+}
+
 // BuildProfile creates a profile from a set of Record. The key is
 // irrelevant.
 func BuildProfile(prof map[uint64]Record) *profile.Profile {
