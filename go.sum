@@ -1,0 +1,4 @@
+github.com/FiloSottile/tracetools v0.0.0-20170224232006-df0a1ee8719d h1:Ii90HZvwlcDkVN2lrg0Y7vWF+dqWoTNy7D9yi38PVno=
+github.com/FiloSottile/tracetools v0.0.0-20170224232006-df0a1ee8719d/go.mod h1:AZZQMZCqXDZRp4aeLjtxFxDWLTt2rblkbIPUb0kDmuk=
+github.com/google/pprof v0.0.0-20170224191306-7eb5ba977f28 h1:a30RwJQRzM02+qnynKfqHAgn0Vt4xalu9SvNXxe1+9c=
+github.com/google/pprof v0.0.0-20170224191306-7eb5ba977f28/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
