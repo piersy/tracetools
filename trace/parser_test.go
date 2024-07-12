@@ -6,7 +6,7 @@ package trace
 
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -25,37 +25,58 @@ func TestCorruptedInputs(t *testing.T) {
 		"go 1.5 trace\x00\x00\x00\x00\xc3\x0200",
 	}
 	for _, data := range tests {
-		events, err := Parse(strings.NewReader(data), "")
-		if err == nil || events != nil {
+		res, err := Parse(strings.NewReader(data), "")
+		if err == nil || res.Events != nil || res.Stacks != nil {
 			t.Fatalf("no error on input: %q", data)
 		}
 	}
 }
 
 func TestParseCanned(t *testing.T) {
-	files, err := ioutil.ReadDir("./testdata")
+	files, err := os.ReadDir("./testdata")
 	if err != nil {
 		t.Fatalf("failed to read ./testdata: %v", err)
 	}
 	for _, f := range files {
-		data, err := ioutil.ReadFile(filepath.Join("./testdata", f.Name()))
+		info, err := f.Info()
 		if err != nil {
-			t.Fatalf("failed to read input file: %v", err)
+			t.Fatal(err)
+		}
+		if testing.Short() && info.Size() > 10000 {
+			continue
+		}
+		name := filepath.Join("./testdata", f.Name())
+		data, err := os.ReadFile(name)
+		if err != nil {
+			t.Fatal(err)
 		}
 		// Instead of Parse that requires a proper binary name for old traces,
 		// we use 'parse' that omits symbol lookup if an empty string is given.
-		_, _, err = parse(bytes.NewReader(data), "")
+		ver, res, err := parse(bytes.NewReader(data), "")
 		switch {
 		case strings.HasSuffix(f.Name(), "_good"):
 			if err != nil {
 				t.Errorf("failed to parse good trace %v: %v", f.Name(), err)
 			}
+			checkTrace(t, ver, res)
 		case strings.HasSuffix(f.Name(), "_unordered"):
 			if err != ErrTimeOrder {
 				t.Errorf("unordered trace is not detected %v: %v", f.Name(), err)
 			}
 		default:
 			t.Errorf("unknown input file suffix: %v", f.Name())
+		}
+	}
+}
+
+// checkTrace walks over a good trace and makes a bunch of additional checks
+// that may not cause the parser to outright fail.
+func checkTrace(t *testing.T, ver int, res ParseResult) {
+	for _, ev := range res.Events {
+		if ver >= 1021 {
+			if ev.Type == EvSTWStart && ev.SArgs[0] == "unknown" {
+				t.Errorf("found unknown STW event; update stwReasonStrings?")
+			}
 		}
 	}
 }

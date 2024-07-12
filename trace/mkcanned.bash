@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/nix/store/x1xxsh1gp6y389hyl40a0i74dkxiprl7-bash-5.2-p15/bin/bash
 # Copyright 2016 The Go Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
@@ -13,7 +13,8 @@ if [ $# != 1 ]; then
     exit 1
 fi
 
-go test -run ClientServerParallel4 -trace "testdata/http_$1_good" net/http
-go test -run 'TraceStress$|TraceStressStartStop$' runtime/trace -savetraces
+go test -run '^$' -bench ClientServerParallel4 -benchtime 10x -trace "testdata/http_$1_good" net/http
+go test -run 'TraceStress$|TraceStressStartStop$|TestUserTaskRegion$' runtime/trace -savetraces
 mv ../../runtime/trace/TestTraceStress.trace "testdata/stress_$1_good"
 mv ../../runtime/trace/TestTraceStressStartStop.trace "testdata/stress_start_stop_$1_good"
+mv ../../runtime/trace/TestUserTaskRegion.trace "testdata/user_task_region_$1_good"
